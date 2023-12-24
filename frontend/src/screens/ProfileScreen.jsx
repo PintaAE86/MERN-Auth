@@ -5,12 +5,12 @@ import FormContainer from "../components/FormContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify';
 import Loader from '../components/Loader';
-import { useRegisterMutation } from "../slices/usersApiSlice";
 import { setCredentials } from "../slices/authSlices";
+import { useUpdateUserMutation } from "../slices/usersApiSlice";
 
 
 
-const RegisterScreen = () => {
+const ProfileScreen = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,16 +20,16 @@ const RegisterScreen = () => {
       
     const dispatch = useDispatch();
     const navigate = useNavigate();
-  
-    const [register, { isLoading }] = useRegisterMutation();
 
     const { userInfo } = useSelector((state) => state.auth);
 
+    const [updateProfile, {isLoading}] = useUpdateUserMutation() 
+
     useEffect(() => {
-        if (userInfo) {
-          navigate('/');
-        }
-      }, [navigate, userInfo]);
+       setName(userInfo.name);
+       setName(userInfo.email)
+
+      }, [useInfo.setName, userInfo.setEmail]);
 
    
 
@@ -39,18 +39,26 @@ const RegisterScreen = () => {
             toast.error('Passwords do not match!')
         }else{
             try {
-                const res = await register({name, email, password}).unwrap();
+                const res = await updateProfile({
+                    _id: userInfo._id,
+                    name,
+                    email,
+                    password
+                }).unwrap();
+
                 dispatch(setCredentials({...res}));
+                toast.success('Profile Update')
                 navigate('/')
             } catch (err) {
                 toast.error(err?.data?.message || err.error);
               }
+           
         }
     }
 
   return (
     <FormContainer>
-        <h1>Sign Up</h1>
+        <h1>Update Profile</h1>
         <Form onSubmit={ submitHandler }>
         <Form.Group className="my-2" controlId="name">
                 <Form.Label>Name</Form.Label>
@@ -89,20 +97,14 @@ const RegisterScreen = () => {
                     onChange={ (e)=> setConfirmPassword(e.target.value)}
                 ></Form.Control>
             </Form.Group>
-            {isLoading && <Loader />}
+            { isLoading  && <Loader />}
             <Button type="submit" variant="primary" className="mt-3">
-                Sigh Up
+                Update 
             </Button>
-
-            <Row className="py-3">
-                <Col>
-                    Already have an account? <Link to='/login'>Register</Link>
-                </Col>
-            </Row>
         </Form>
 
     </FormContainer>
   )
 }
 
-export default RegisterScreen;
+export default ProfileScreen;
